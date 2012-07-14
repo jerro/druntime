@@ -2663,6 +2663,12 @@ struct Gcx
                     movq  sp[RBP], RSP      ;
                 }
             }
+            else version (ARM)
+            {
+                import ldc.llvmasm;
+
+                __asm("push {r0-r12}", "");
+            }
             else
             {
                 static assert( false, "Architecture not supported." );
@@ -2713,6 +2719,12 @@ struct Gcx
         else version( LDC )
         {
             // nothing to do
+        }
+        else version (ARM)
+        {
+            import ldc.llvmasm;
+
+            __asm("pop {r0-r12}", "");
         }
         else version (D_InlineAsm_X86)
         {

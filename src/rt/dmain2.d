@@ -224,23 +224,38 @@ extern (C)
     }
 }
 
-extern (C) void _d_hidden_func()
+version (LDC)
 {
-    Object o;
-    version(D_InlineAsm_X86)
-        asm
-        {
-            mov o, EAX;
-        }
-    else version(D_InlineAsm_X86_64)
-        asm
-        {
-            mov o, RDI;
-        }
-    else
-        static assert(0, "unknown os");
+    // References to this are emitted into the vtbl for hidden functions. As
+    // such, we need to match the calling convention for member method calls.
+    // The below should be a reasonable guess for virtually all architectures,
+    // given how we are lowering the this paramters to just normal (IR-level)
+    // parameters.
+    extern (C) void _d_hidden_func(Object o)
+    {
+        onHiddenFuncError(o);
+    }
+}
+else
+{
+    extern (C) void _d_hidden_func()
+    {
+        Object o;
+        version(D_InlineAsm_X86)
+            asm
+            {
+                mov o, EAX;
+            }
+        else version(D_InlineAsm_X86_64)
+            asm
+            {
+                mov o, RDI;
+            }
+        else
+            static assert(0, "unknown os");
 
-    onHiddenFuncError(o);
+        onHiddenFuncError(o);
+    }
 }
 
 shared bool _d_isHalting = false;

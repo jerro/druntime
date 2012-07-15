@@ -87,28 +87,30 @@ extern (C) void* rt_stackBottom()
 {
     version( Windows )
     {
-        void* bottom;
         version( D_InlineAsm_X86 )
         {
             asm
             {
+                naked;
+
                 mov EAX,FS:4;
-                mov bottom, EAX;
+                ret;
             }
         }
         else version( D_InlineAsm_X86_64 )
         {
             asm
             {
+                naked;
+
                 mov RAX,GS:8;
-                mov bottom, RAX;
+                ret;
             }
         }
         else
         {
             static assert( false, "Platform not supported." );
         }
-        return bottom;
     }
     else version( linux )
     {
@@ -185,7 +187,7 @@ extern (C) void* rt_stackTop()
 
 private
 {
-    version( Win32 )
+    version( Windows )
     {
         extern (C)
         {
@@ -261,7 +263,7 @@ void initStaticDataGC()
         return p - (cast(size_t) p & (S-1));
     }
 
-    version( Win32 )
+    version( Windows )
     {
         dataStart = adjust_up( &Data_Start );
         dataEnd   = adjust_down( &Data_End );
